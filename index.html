@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Intersection of 2 convex polyhedra</title>
+		<style>
+			body { margin: 3; }
+		</style>
+		<script type="text/x-mathjax-config">
+			MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+		</script>
+		<script type="text/javascript"
+			src="http://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+		</script>
+	</head>
+	<body>
+		<center><h1>Computation of the intersection of 2 convex polyhedra</h1>
+		Authors : Yi Ren, Merlin Hannon</center>
+
+
+        <h1>Introduction</h1>
+
+		In this work we are studying the paper <a href="https://tmc.web.engr.illinois.edu/dk_socg.pdf"> "A Simpler Linear-Time Algorithm for Intersecting Two Convex Polyhedra in Three Dimensions".</a>
+		This website illustrates Timothy M. CHan's algorithm by explaining details and providing illustrations of it for every step.
+
+		<h1>The problem</h1>
+
+		The studied problem is the following : given 2 convex polyhedra in 3D, compute their intersection.
+		<div style="text-align: left;"><img src="images/intersection.png" height="200" width="280" /></div>
+		
+		<h1>Representation of a polyhedron</h1>
+
+		A convex polyhedron $P$ can be described using the set of planes $H$ defining its faces.
+
+		$$
+			H = \left \{
+			\begin{array}{r c l}
+			H_1    & \equiv & a_1x + b_1y +c_1z = d_1 \\
+			H_2    & \equiv & a_2x + b_2y +c_2z = d_2 \\
+			\vdots &        & \vdots                  \\
+			H_n    & \equiv & a_nx + b_ny +c_nz = d_n
+			\end{array}
+			\right \}
+		$$
+
+		By associating a constraint to each face, $P$ becomes the intersection of all these constraints.
+
+		$$
+			P = \bigcap_{i=0}^n \left \{
+			\begin{array}{r c l}
+			P_1    & \equiv & a_1x + b_1y +c_1z \leq d_1 \\
+			P_2    & \equiv & a_2x + b_2y +c_2z \leq d_2 \\
+			\vdots &        & \vdots                     \\
+			P_n    & \equiv & a_nx + b_ny +c_nz \leq d_n
+			\end{array}
+			\right \}
+		$$
+
+		Before we start, we can assume that the origin is inside the intersection of the polyhedra. Indeed, if it is not the case, we can compute a single point $o$ inside the intersection and then make $o$ the origin. This step can be done in linear time by 3-d linear programming.
+
+		<h1>Transformation applied on the polyhedra</h1>
+
+		For now, each constraint cuts the space in 2 and eliminates one of the 2 regions. But this region could be the one above the plane or the one below it : it depends of the constraint. In order to make a simpler algorithm, we would like that each constraint eliminates the points <b>above</b> the associated plane. We can then apply the following transformation $f$ to transform the polyhedron. 
+
+		$$
+			(x', y', z') = f(x, y, z) = (\frac{x}{z}, \frac{y}{z}, \frac{-1}{z}) \\[10pt]
+			\rightarrow \left \{
+				\begin{array}{r c l c l}
+					x & = & x'z           & = & \frac{-x'}{z'}\\
+					y & = & y'z           & = & \frac{-y'}{z'}\\
+					z & = & \frac{-1}{z'} &   & \\
+				\end{array}
+			\right. \\
+		$$
+
+		<b>What do the constraints become after the transformation ? </b>
+
+		By injecting these new variables in the constraints we obtain the following unbounded polyhedron.
+
+		$$
+			P = \bigcap_{i=0}^n \left \{
+			\begin{array}{r c l}
+			P_1    & \equiv & -a_1x' - b_1y' - d_1z' \leq c_1 \\
+			P_2    & \equiv & -a_2x' - b_2y' - d_2z' \leq c_2 \\
+			\vdots &        & \vdots                          \\
+			P_n    & \equiv & -a_nx' - b_ny' - d_nz' \leq c_n
+			\end{array}
+			\right \}
+		$$
+
+		After the transfomration, if we keep only the points that are <b>above</b> the XY plane, we end up with an unbounded polyhedron fromed by the region under a lower envelope of planes.
+
+		The following figure shows what would do such an equivalent transformation on two polygons : it "opens" the polygons. It would be the same in 3D for the polyhedra. Note that the transformation does not change the structure of the original polyhedra.
+
+		<div style="text-align: left;"><img src="images/afterTransformation.png" height="200" width="700" /></div>
+
+		You can test to apply such a transformation by yourself in the following illustration.
+
+		<input id="transButton" type="button" value="Apply transformation" />
+		<script src="js/three.js"></script>
+        <script src="js/polyhedron.js"></script>
+        <script src="js/main.js"></script>
+
+		Note : we have the right to keep only the points that are above the plane XY, because we can process in 2 steps : compute first the intersection for z > 0, then for z < 0, and finally glue the results together.
+
+		<h1>The algorithm</h1>
+
+		After the transformation, we end up with a new problem : given 2 unbounded from below polyhedra, compute their intersection.
+
+		<h2>Input</h2>
+
+		The algorithm takes 2 polyhedra $P(A)$ and $P(B)$ as input, defined as above.
+
+		<h2>If the polyhedra are small, compute intersection by brute force</h2>
+
+		If the size of $P(A)$ and $P(B)$ are small (below a certain defined constant) then we can compute the answer by brute force and we don't need any special trick. Indeed, each face of the polyhedron is represented by an equation of the form $ax+by+cz=d$. So an idea could be to solve the system of inequations formed by all the constraints. This take constant time because the size of the polyhedra is bounded by a constant. 
+
+		<h2>Solve the problem recursively: compute intersection of simpler polyhedra $P'$ = $P(A')$ &#8745; $P(B')$ </h2>
+
+		We can proceed in 2 steps :
+		<ul>
+  			<li>Reduce the number of constraints by removing an independant set $I_j$ of faces of each polyhedron $j$. This creates simpler polyhedra, because they contain less faces and edges than before: set A' = A\$I_a$ and set B' = B\$I_b$.</li>
+  			<li>Recursively compute P' = P(A') &#8745; P(B').</li>
+		</ul>
+
+		Note that a set of independent faces of a polyhedron can be very large, so by removing it we simplify a lot the problem. After this simplification the work needed to compute the intersection is a lot smaller than before.
+
+		<div style="text-align: center;"><img src="images/simpler_polyhedron.jpg" height="250" width="300" /></div>
+
+		<h2>Compute intersection $P$ = $P(A) \cap P(B)$ </h2>
+		
+		<p>
+			<b>Definition : A triangulation</b>
+			of a polyhedron $P$ is the set of triangles we find by triangulating each face of $P$.
+		</p>
+		
+		<p>
+			<b>Definition : The conflict list</b>
+			of a polyhedron with a triangle $\Delta$ is the subset of planes of that polyhedron intersecting the region underneath the triangle $\Delta$ (i.e. an unbounded prism from below).
+
+			<div style="text-align: center;"><img src="images/conflictList1.jpg" height="200" width="350" /></div>
+		</p>
+		
+		<p>
+			<b>Definition : the j-witnesses</b>
+			of a point $v$ included in a polyhedron $j$ are 3 points of this polyhedron forming a triangle such that $v$ is below that triangle. They certify that $v$ is included in the polyhedron (because it is not bounded from below after the transformation). An example is given in the next figure.
+		</p>
+
+		<div style="text-align: center;"><img src="images/witness.png" height="200" width="650" /></div>
+		
+		The main idea of the algorithm is to use the previously computed simpler intersection $P'$ and the concept of conflict list to compute P = P(A) &#8745; P(B):
+		<ul>
+			<li>For each cell $\Delta$ of the triangulation of $P'$, we generate 2 conflict lists: $A_\Delta$ = {planes of A intersecting the region under $\Delta$} and $B_\Delta$ = {planes of B intersecting the region under $\Delta$}. (more details below)
+			 </li>
+			<li>After that, inside the region under $\Delta$, we can compute the intersection of the 2 polyhedra generated by the regions under the 2 computed conflict lists</li>. 
+  			<li>At the end, we glue all the results that were found with every $\Delta$ together, that builds the polyhedron $P$ which is the intersection of P(A) and P(B).</li>
+		</ul>
+
+		To generate the conflict list it could take a lot of time, but we don't need to verify all the different planes. We just have to check planes among a list of candidates. Here are all the candidates : given all the j-witnesses of $v_1$, $v_2$ and $v_3$ $\in \Delta$, every plane below of these points is a candidate, see example below.
+
+		<div style="text-align: center;"><img src="images/candidate.png" height="400" width="650" /></div>
+
+		With all the intersections we can create a new polyhedron $P$ by gluing all the results together. This polyhedron is the intersection of $P_1$ and $P_2$.
+
+		<h2>Compute new witnesses of $P$</h2>
+
+		For each vertex $v$ of $P$, $v$ is inside $P'$ = intersection of the simplified polyhedra $A'$ and $B'$. This is certified by the witnesses. To generate new witnesses of $v$ for the full intersection $P$, we can look at the points that are part of these candidate lists: 
+
+		<ul>
+            <li> $W_{A,\Delta}$ := { vertices $w$ of $P(A)$: $w$ is an old witness of a vertex of $\Delta$ or $w$ is on a plane in $Ia$ &#8745; $A\Delta$ }
+              </li>
+
+            <li> $W_{B,\Delta}$ := { vertices $w$ of $P(B)$: $w$ is an old witness of a vertex of $\Delta$ or $w$ is on a plane in $Ib$ &#8745; $B\Delta$ }
+              </li>
+        </ul>
+
+		<p>where $A\Delta$ and $B\Delta$ are the lists of candidates we used before to find the conflict lists in P(A) and P(B), and $Ia$, $Ib$ are the independant sets of planes that were cut from A and B during the first step.</p>
+
+        In another word, the candidate witnesses are either the old witnesses for the 3 vertices of $\Delta$ or vertices on {planes of $I$ that intersect the candidates of the conflict list}.
+
+		<h2>Output</h2>
+
+		Returns the intersection $P$ of both polyhedra $P(A)$ and $P(B)$ and all the witnesses of its vertices. Note that we still have to apply $f^{-1}$ on the result to place it back in the original coordinates system $(x, y, z)$.
+
+		<h1>Reference</h1>
+		<ol>
+		<li>
+			<p>Timothy M. Chan, <cite>A Simpler Linear-Time Algorithm for Intersecting Two Convex Polyhedra in Three Dimensions</cite>, <a href="https://tmc.web.engr.illinois.edu/dk_socg.pdf"> M. Chan.</a></p>
+		</li>
+		<li>
+			<p>Timothy M. Chan, <cite>A Simpler Linear-Time Algorithm for Intersecting Two Convex Polyhedra in Three Dimensions talk, <a href="https://tmc.web.engr.illinois.edu/talks/dk_socg_talk.pdf"> Talk.</a></p>
+		</li>
+		</ol>
+
+	</body>
+</html>
