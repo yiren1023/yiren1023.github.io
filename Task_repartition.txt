@@ -1,0 +1,5 @@
+We collaborate as a team of two persons, Merlin and Yi.
+Together, we begin by reading and discussing the paper, then drafting each part.
+We next move on to the practical part:
+Merlin is in charge of creating the HTML page framework and the polyhedron transformation.
+Yi is responsible for creating different illustrations required to explain the theoretical part and for creating a summary of the analysis of the theoretical section. 
