@@ -6,12 +6,15 @@
 		<style>
 			body { margin: 3; }
 		</style>
-		<script type="text/x-mathjax-config">
+		<!-- <script type="text/x-mathjax-config">
 			MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
 		</script>
 		<script type="text/javascript"
 			src="http://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-		</script>
+		</script> -->
+		<script type="text/javascript"
+  			src="./js/LaTeXMathML.js">
+  		</script>
 	</head>
 	<body>
 		<center><h1>Computation of the intersection of 2 convex polyhedra</h1>
@@ -32,7 +35,8 @@
 
 		A convex polyhedron $P$ can be described using the set of planes $H$ defining its faces.
 
-		$$
+		<center>
+		$
 			H = \left \{
 			\begin{array}{r c l}
 			H_1    & \equiv & a_1x + b_1y +c_1z = d_1 \\
@@ -41,11 +45,13 @@
 			H_n    & \equiv & a_nx + b_ny +c_nz = d_n
 			\end{array}
 			\right \}
-		$$
+		$
+		</center>
 
 		By associating a constraint to each face, $P$ becomes the intersection of all these constraints.
 
-		$$
+		<center>
+		$
 			P = \bigcap_{i=0}^n \left \{
 			\begin{array}{r c l}
 			P_1    & \equiv & a_1x + b_1y +c_1z \leq d_1 \\
@@ -54,7 +60,8 @@
 			P_n    & \equiv & a_nx + b_ny +c_nz \leq d_n
 			\end{array}
 			\right \}
-		$$
+		$
+		</center>
 
 		Before we start, we can assume that the origin is inside the intersection of the polyhedra. Indeed, if it is not the case, we can compute a single point $o$ inside the intersection and then make $o$ the origin. This step can be done in linear time by 3-d linear programming.
 
@@ -62,7 +69,8 @@
 
 		For now, each constraint cuts the space in 2 and eliminates one of the 2 regions. But this region could be the one above the plane or the one below it : it depends of the constraint. In order to make a simpler algorithm, we would like that each constraint eliminates the points <b>above</b> the associated plane. We can then apply the following transformation $f$ to transform the polyhedron. 
 
-		$$
+		<center>
+		$
 			(x', y', z') = f(x, y, z) = (\frac{x}{z}, \frac{y}{z}, \frac{-1}{z}) \\[10pt]
 			\rightarrow \left \{
 				\begin{array}{r c l c l}
@@ -71,13 +79,15 @@
 					z & = & \frac{-1}{z'} &   & \\
 				\end{array}
 			\right. \\
-		$$
+		$
+		</center>
 
 		<b>What do the constraints become after the transformation ? </b>
 
 		By injecting these new variables in the constraints we obtain the following unbounded polyhedron.
 
-		$$
+		<center>
+		$
 			P = \bigcap_{i=0}^n \left \{
 			\begin{array}{r c l}
 			P_1    & \equiv & -a_1x' - b_1y' - d_1z' \leq c_1 \\
@@ -86,7 +96,8 @@
 			P_n    & \equiv & -a_nx' - b_ny' - d_nz' \leq c_n
 			\end{array}
 			\right \}
-		$$
+		$
+		</center>
 
 		After the transfomration, if we keep only the points that are <b>above</b> the XY plane, we end up with an unbounded polyhedron fromed by the region under a lower envelope of planes.
 
