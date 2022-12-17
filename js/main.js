@@ -1,5 +1,4 @@
 //window.onload = function () {
-
   let button = document.getElementById("transButton");
   button.onclick = buttonClicked;
 
@@ -106,6 +105,5 @@
       displayOriginalPolyhedron();
     }
   }
-
   displayOriginalPolyhedron();
   animate();
