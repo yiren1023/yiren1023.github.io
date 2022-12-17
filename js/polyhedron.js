@@ -1,9 +1,14 @@
 class Point {
-  constructor(x, y, z, id) {
+  constructor(x, y, z, id, corresponding_point) {
     this.x = x;
     this.y = y;
     this.z = z;
     this.id = id;
+    this.corresponding_point = corresponding_point;
+  }
+
+  get_corresponding_point() {
+    return this.corresponding_point;
   }
 
   substract(B) {
@@ -21,12 +26,14 @@ class Point {
   }
 
   getPointAfterTran() {
-    return new Point(
+    this.corresponding_point = new Point(
       this.x / this.z,
       this.y / this.z,
       -1 / this.z,
-      this.id
+      this.id,
+      this
     );
+    return this.corresponding_point;
   }
 }
 
@@ -99,6 +106,7 @@ class Polyhedron {
   }
 
   getPolyAfterTran() {
+    /*
     let newPoints = [];
     for (let p = 0; p < this.points.length; p++) {
       newPoints.push(this.points[p].getPointAfterTran());
@@ -125,6 +133,101 @@ class Polyhedron {
         newFaces.push(newFace);
       }
     }
+    return new Polyhedron(newPoints, newFaces);
+    */
+    let oldPoints = this.points
+    let newPoints = []
+    let oldFaces = this.faces
+    let newFaces = []
+    for (let p = 0; p < this.points.length; p++) {
+      newPoints.push(oldPoints[p].getPointAfterTran());
+    }
+    for (let f = 0; f < oldFaces.length; f++) {
+      let oldFace = this.faces[f];
+      let newFace = [];
+      for (let p = 0; p < oldFace.length; p++) {
+        if (oldFace[p].z > 0) {
+          newFace.push(oldFace[p].get_corresponding_point())
+        }
+        if (oldFace[p].z < 0 &&
+                this.getPrev(p, oldFace).z > 0) {
+          let currentAfterTran = oldFace[p].get_corresponding_point();
+          let prevAfterTran = this.getPrev(p, oldFace).get_corresponding_point();
+          let v_x = prevAfterTran.x - currentAfterTran.x;
+          let v_y = prevAfterTran.y - currentAfterTran.y;
+          let v_z = prevAfterTran.z - currentAfterTran.z;
+          let farPoint = new Point(currentAfterTran.x + 5*v_x, 
+                                   currentAfterTran.y + 5*v_y, 
+                                   currentAfterTran.z + 5*v_z, 
+                                   newPoints.length, 
+                                   null);
+          newPoints.push(farPoint);
+          newFace.push(farPoint);
+        }
+        if (oldFace[p].z < 0 &&
+                this.getNext(p, oldFace).z > 0) {
+          let currentAfterTran = oldFace[p].get_corresponding_point();
+          let nextAfterTran = this.getNext(p, oldFace).get_corresponding_point();
+          let v_x = nextAfterTran.x - currentAfterTran.x;
+          let v_y = nextAfterTran.y - currentAfterTran.y;
+          let v_z = nextAfterTran.z - currentAfterTran.z;
+          let farPoint = new Point(currentAfterTran.x + 5*v_x, 
+                                   currentAfterTran.y + 5*v_y, 
+                                   currentAfterTran.z + 5*v_z, 
+                                   newPoints.length, 
+                                   null);
+          newPoints.push(farPoint);
+          newFace.push(farPoint);
+        }
+      }
+      if (newFace.length >= 3) {
+        newFaces.push(newFace);
+      }
+    }
+
+    for (let f = 0; f < oldFaces.length; f++) {
+      let oldFace = this.faces[f];
+      let newFace = [];
+      for (let p = 0; p < oldFace.length; p++) {
+        if (oldFace[p].z < 0) {
+          newFace.push(oldFace[p].get_corresponding_point())
+        }
+        if (oldFace[p].z > 0 &&
+                this.getPrev(p, oldFace).z < 0) {
+          let currentAfterTran = oldFace[p].get_corresponding_point();
+          let prevAfterTran = this.getPrev(p, oldFace).get_corresponding_point();
+          let v_x = prevAfterTran.x - currentAfterTran.x;
+          let v_y = prevAfterTran.y - currentAfterTran.y;
+          let v_z = prevAfterTran.z - currentAfterTran.z;
+          let farPoint = new Point(currentAfterTran.x + 5*v_x, 
+                                   currentAfterTran.y + 5*v_y, 
+                                   currentAfterTran.z + 5*v_z, 
+                                   newPoints.length, 
+                                   null);
+          newPoints.push(farPoint);
+          newFace.push(farPoint);
+        }
+        if (oldFace[p].z > 0 &&
+                this.getNext(p, oldFace).z < 0) {
+          let currentAfterTran = oldFace[p].get_corresponding_point();
+          let nextAfterTran = this.getNext(p, oldFace).get_corresponding_point();
+          let v_x = nextAfterTran.x - currentAfterTran.x;
+          let v_y = nextAfterTran.y - currentAfterTran.y;
+          let v_z = nextAfterTran.z - currentAfterTran.z;
+          let farPoint = new Point(currentAfterTran.x + 5*v_x, 
+                                   currentAfterTran.y + 5*v_y, 
+                                   currentAfterTran.z + 5*v_z, 
+                                   newPoints.length, 
+                                   null);
+          newPoints.push(farPoint);
+          newFace.push(farPoint);
+        }
+      }
+      if (newFace.length >= 3) {
+        newFaces.push(newFace);
+      }
+    }
+
     return new Polyhedron(newPoints, newFaces);
   }
 
