@@ -78,13 +78,13 @@
       new Point(-3, 3, -2, 5)
     ];*/
     let points = [
-      new Point(0, 2, 1, 0),
-      new Point(2, 0, 1, 1),
-      new Point(0, 3, 3, 2),
-      new Point(3, 0, 3, 3),
-      new Point(0, 0, -1, 4),
-      new Point(-2, -2, 2, 5)
-    ]
+      new Point(0, 2, 1, 0, null),
+      new Point(2, 0, 1, 1, null),
+      new Point(0, 3, 3, 2, null),
+      new Point(3, 0, 3, 3, null),
+      new Point(0, 0, -1, 4, null),
+      new Point(-2, -2, 2, 5, null)
+    ];
     let faces = [
       [points[0], points[4], points[5]],
       [points[0], points[1], points[4]],
